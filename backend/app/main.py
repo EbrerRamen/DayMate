@@ -71,12 +71,7 @@ async def reverse_geocode(lat: float, lon: float):
         r = await client.get(url, params=params)
         r.raise_for_status()
         data = r.json()
-        # city fallback options
-        location = data.get("address", {}).get("city") \
-                   or data.get("address", {}).get("town") \
-                   or data.get("address", {}).get("state") \
-                   or "your area"
-        print(f"[Reverse Geocode] {lat}, {lon} → {location}")  # ✅ print here        
+       
         return data.get("address", {}).get("city") or data.get("address", {}).get("town") or data.get("address", {}).get("state") or "your area"
 
 async def fetch_news(location: str, page_size: int = 5):
