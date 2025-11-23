@@ -16,13 +16,10 @@ function App() {
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude: lat, longitude: lon } = pos.coords;
-        setCoords({ lat, lon });
-      },
+      (pos) => setCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
       (err) => {
         console.error(err);
-        alert("Could not get geolocation. Enter coords manually or enable location.");
+        alert("Could not get geolocation. Enable location or enter manually.");
       }
     );
   }, []);
@@ -31,13 +28,9 @@ function App() {
     if (!coords) return;
     const fetchData = async () => {
       try {
-        const w = await axios.get(`${API_BASE}/api/weather`, {
-          params: { lat: coords.lat, lon: coords.lon },
-        });
+        const w = await axios.get(`${API_BASE}/api/weather`, { params: { lat: coords.lat, lon: coords.lon } });
         setWeather(w.data);
-        const n = await axios.get(`${API_BASE}/api/news`, {
-          params: { location: "Dhaka" }, // or reverse geocode to location name
-        });
+        const n = await axios.get(`${API_BASE}/api/news`, { params: { location: "Dhaka" } });
         setNews(n.data);
       } catch (e) {
         console.error(e);
@@ -54,8 +47,8 @@ function App() {
       const r = await axios.post(`${API_BASE}/api/plan`, {
         lat: coords.lat,
         lon: coords.lon,
-        location_name: "Dhaka", // ideally reverse geocode
-        preferences: { outdoors: true }
+        location_name: "Dhaka",
+        preferences: { outdoors: true },
       });
       setPlan(r.data);
     } catch (e) {
@@ -67,83 +60,96 @@ function App() {
   };
 
   return (
-    <div style={{ padding: 20, fontFamily: "Inter, system-ui" }}>
-      <h1>DayMate — AI Daily Planner</h1>
-
-      <div style={{ marginTop: 20 }}>
-        <button onClick={onGeneratePlan} disabled={loading || !coords}>
-          {loading ? "Generating..." : "Generate Plan"}
+    <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6">
+      
+      {/* Hero */}
+      <header className="max-w-4xl mx-auto text-center mb-12">
+        <h1 className="text-5xl font-bold mb-2 drop-shadow-md">
+          DayMate — <span className="text-cyan-400">Your AI Daily Planner</span>
+        </h1>
+        <p className="text-indigo-200 text-lg">Plan your day smarter with weather, news, and AI-powered suggestions.</p>
+        <button
+          onClick={onGeneratePlan}
+          disabled={loading || !coords}
+          className={`mt-6 px-8 py-3 rounded-2xl font-semibold shadow-lg transition-all duration-200
+            ${loading || !coords 
+              ? "bg-indigo-600/50 cursor-not-allowed" 
+              : "bg-cyan-500 hover:bg-cyan-400 hover:scale-105"} text-white`}
+        >
+          {loading ? "Generating…" : "Generate Plan"}
         </button>
+      </header>
+
+      {/* Weather & News */}
+      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        {weather && (
+          <div className="p-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
+            <h2 className="text-2xl font-semibold text-cyan-300 mb-2">🌤 Weather</h2>
+            <p className="capitalize text-lg font-medium">{weather.weather[0].description}</p>
+            <p className="text-3xl font-bold mt-1">{weather.main.temp}°C</p>
+          </div>
+        )}
+
+        {news?.articles && (
+          <div className="p-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
+            <h2 className="text-2xl font-semibold text-cyan-300 mb-2">📰 Top News</h2>
+            <ul className="space-y-2 text-indigo-100">
+              {news.articles.slice(0, 5).map((a, idx) => (
+                <li key={idx}>
+                  <a href={a.url} target="_blank" rel="noreferrer" className="hover:text-cyan-400 hover:underline transition">
+                    {a.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
-      {weather && (
-        <section style={{ marginTop: 20 }}>
-          <h2>Weather</h2>
-          <div>Current: {weather.weather[0].description}, {weather.main.temp}°C</div>
-        </section>
-      )}
-
-      {news && news.articles && (
-        <section style={{ marginTop: 20 }}>
-          <h2>Top news</h2>
-          <ul>
-            {news.articles.slice(0,5).map((a, idx) => (
-              <li key={idx}><a href={a.url} target="_blank" rel="noreferrer">{a.title}</a></li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {plan && plan.plan && (
-        <section style={{ marginTop: 20 }}>
-          <h2>AI Plan</h2>
-
-          {/* Summary */}
+      {/* AI Plan */}
+      {plan?.plan && (
+        <div className="max-w-4xl mx-auto space-y-6">
           {plan.plan.summary && (
-            <p><strong>Summary:</strong> {plan.plan.summary}</p>
+            <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-md">
+              <h3 className="text-xl font-semibold text-cyan-300 mb-2">📋 Summary</h3>
+              <p>{plan.plan.summary}</p>
+            </div>
           )}
 
-          {/* Priority Actions */}
           {plan.plan.priority_actions?.length > 0 && (
-            <>
-              <h3>Priority Actions</h3>
-              <ul>
-                {plan.plan.priority_actions.map((action, idx) => (
-                  <li key={idx}>{action}</li>
-                ))}
+            <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-md">
+              <h3 className="text-xl font-semibold text-cyan-300 mb-2">🔥 Priority Actions</h3>
+              <ul className="list-disc list-inside space-y-1">
+                {plan.plan.priority_actions.map((a, i) => <li key={i}>{a}</li>)}
               </ul>
-            </>
+            </div>
           )}
 
-          {/* Suggestions */}
           {plan.plan.suggestions?.length > 0 && (
-            <>
-              <h3>Suggestions</h3>
-              <ul>
-                {plan.plan.suggestions.map((s, idx) => (
-                  <li key={idx}>{s}</li>
-                ))}
+            <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-md">
+              <h3 className="text-xl font-semibold text-cyan-300 mb-2">💡 Suggestions</h3>
+              <ul className="list-disc list-inside space-y-1">
+                {plan.plan.suggestions.map((s, i) => <li key={i}>{s}</li>)}
               </ul>
-            </>
+            </div>
           )}
 
-          {/* Quick Tips */}
           {plan.plan.quick_tips?.length > 0 && (
-            <>
-              <h3>Quick Tips</h3>
-              <ul>
-                {plan.plan.quick_tips.map((tip, idx) => (
-                  <li key={idx}>{tip}</li>
-                ))}
+            <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-md">
+              <h3 className="text-xl font-semibold text-cyan-300 mb-2">⚡ Quick Tips</h3>
+              <ul className="list-disc list-inside space-y-1">
+                {plan.plan.quick_tips.map((t, i) => <li key={i}>{t}</li>)}
               </ul>
-            </>
+            </div>
           )}
 
-          {/* Rationale */}
           {plan.plan.rationale && (
-            <p><strong>Rationale:</strong> {plan.plan.rationale}</p>
+            <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-md">
+              <h3 className="text-xl font-semibold text-cyan-300 mb-2">🧭 Rationale</h3>
+              <p>{plan.plan.rationale}</p>
+            </div>
           )}
-        </section>
+        </div>
       )}
     </div>
   );
