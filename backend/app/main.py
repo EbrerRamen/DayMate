@@ -130,31 +130,15 @@ async def call_llm(prompt: str):
         max_tokens=500
     )
 
-        # url = "https://router.huggingface.co/v1"
-        # headers = {"Authorization": f"Bearer {LLM_API_KEY}"}
-        # payload = {
-        #     "model": "deepseek-ai/DeepSeek-V3.2-Exp:novita",
-        #     "messages": [{"role": "user", "content": prompt}],
-        #     "max_tokens": 500,
-        #     "temperature": 0.4
-        # }
-
         data = completion.choices[0].message.content
-        print(data)
+        print("LLM output", data)
 
-        # async with httpx.AsyncClient(timeout=30) as client:
-        #     r = await client.post(url, json=payload, headers=headers)
-        
-        # r.raise_for_status()
-        # data = r.json()
-
-        # Hugging Face Chat Completions mimic OpenAI structure
-        # Adjust if keys are different
         try:
-            return data["choices"][0]["message"]["content"]
-        except KeyError:
-            # fallback: return full response if structure is different
-            return str(data)
+            parsed = json.loads(data)
+            return parsed
+        except json.JSONDecodeError:
+            # fallback: return raw string if JSON parsing fails
+            return {"raw": data}
 
     else:
         raise RuntimeError("Unsupported LLM_PROVIDER")
@@ -188,26 +172,8 @@ async def plan(req: PlanRequest):
         prompt = build_prompt(weather, news, req.preferences)
 
         # 3️⃣ Call Hugging Face LLM
-        print("llm_resp")
         llm_resp = await call_llm(prompt)
-        print(llm_resp)
-
-        # 4️⃣ Parse JSON from LLM response
-        import re
-
-        # Sometimes models return extra text around JSON
-        # Extract JSON-looking substring
-        json_match = re.search(r"\{.*\}", llm_resp, re.DOTALL)
-        if json_match:
-            try:
-                parsed = json.loads(json_match.group())
-                return {"plan": parsed}
-            except json.JSONDecodeError:
-                # fallback if parsing fails
-                return {"raw": llm_resp}
-        else:
-            # return raw text if no JSON detected
-            return {"raw": llm_resp}
+        return {"plan": llm_resp}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
