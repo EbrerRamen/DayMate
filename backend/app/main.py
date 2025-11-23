@@ -25,6 +25,7 @@ app.add_middleware(
 
 # Environment variables (must be set on deployment)
 OPENWEATHER_KEY = os.getenv("OPENWEATHER_KEY")
+# print("OpenWeather key:", OPENWEATHER_KEY)
 NEWSAPI_KEY = os.getenv("NEWSAPI_KEY")
 LLM_API_KEY = os.getenv("LLM_API_KEY")  # OpenAI or other provider
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai")  # simple switch
@@ -38,18 +39,24 @@ class PlanRequest(BaseModel):
 async def fetch_weather(lat: float, lon: float):
     if not OPENWEATHER_KEY:
         raise RuntimeError("OPENWEATHER_KEY not set")
-    url = f"https://api.openweathermap.org/data/2.5/onecall"
+    url = f"https://api.openweathermap.org/data/2.5/weather"
     params = {
         "lat": lat,
         "lon": lon,
-        "exclude": "minutely",
         "units": "metric",
         "appid": OPENWEATHER_KEY
     }
     async with httpx.AsyncClient(timeout=10) as client:
-        r = await client.get(url, params=params)
-    r.raise_for_status()
-    return r.json()
+        try:
+            r = await client.get(url, params=params)
+            r.raise_for_status()
+            return r.json()
+        except httpx.HTTPStatusError as e:
+            print("HTTP error:", e.response.status_code, e.response.text)
+            raise HTTPException(status_code=502, detail="Weather API error")
+        except Exception as e:
+            print("Other error:", e)
+            raise HTTPException(status_code=502, detail="Weather API error")
 
 async def fetch_news(location: str, page_size: int = 5):
     if not NEWSAPI_KEY:

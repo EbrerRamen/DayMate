@@ -79,7 +79,7 @@ function App() {
       {weather && (
         <section style={{ marginTop: 20 }}>
           <h2>Weather</h2>
-          <div>Current: {weather.current.weather[0].description}, {weather.current.temp}°C</div>
+          <div>Current: {weather.weather[0].description}, {weather.main.temp}°C</div>
         </section>
       )}
 
