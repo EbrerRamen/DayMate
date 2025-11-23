@@ -94,12 +94,55 @@ function App() {
         </section>
       )}
 
-      {plan && (
+      {plan && plan.plan && (
         <section style={{ marginTop: 20 }}>
           <h2>AI Plan</h2>
-          <pre style={{ whiteSpace: "pre-wrap", background: "#f7f7f7", padding: 12 }}>
-            {JSON.stringify(plan, null, 2)}
-          </pre>
+
+          {/* Summary */}
+          {plan.plan.summary && (
+            <p><strong>Summary:</strong> {plan.plan.summary}</p>
+          )}
+
+          {/* Priority Actions */}
+          {plan.plan.priority_actions?.length > 0 && (
+            <>
+              <h3>Priority Actions</h3>
+              <ul>
+                {plan.plan.priority_actions.map((action, idx) => (
+                  <li key={idx}>{action}</li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {/* Suggestions */}
+          {plan.plan.suggestions?.length > 0 && (
+            <>
+              <h3>Suggestions</h3>
+              <ul>
+                {plan.plan.suggestions.map((s, idx) => (
+                  <li key={idx}>{s}</li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {/* Quick Tips */}
+          {plan.plan.quick_tips?.length > 0 && (
+            <>
+              <h3>Quick Tips</h3>
+              <ul>
+                {plan.plan.quick_tips.map((tip, idx) => (
+                  <li key={idx}>{tip}</li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          {/* Rationale */}
+          {plan.plan.rationale && (
+            <p><strong>Rationale:</strong> {plan.plan.rationale}</p>
+          )}
         </section>
       )}
     </div>
