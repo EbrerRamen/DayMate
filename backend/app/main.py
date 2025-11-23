@@ -59,6 +59,26 @@ async def fetch_weather(lat: float, lon: float):
             print("Other error:", e)
             raise HTTPException(status_code=502, detail="Weather API error")
 
+async def reverse_geocode(lat: float, lon: float):
+    url = "https://nominatim.openstreetmap.org/reverse"
+    params = {
+        "lat": lat,
+        "lon": lon,
+        "format": "json",
+        "accept-language": "en"
+    }
+    async with httpx.AsyncClient(timeout=10) as client:
+        r = await client.get(url, params=params)
+        r.raise_for_status()
+        data = r.json()
+        # city fallback options
+        location = data.get("address", {}).get("city") \
+                   or data.get("address", {}).get("town") \
+                   or data.get("address", {}).get("state") \
+                   or "your area"
+        print(f"[Reverse Geocode] {lat}, {lon} → {location}")  # ✅ print here        
+        return data.get("address", {}).get("city") or data.get("address", {}).get("town") or data.get("address", {}).get("state") or "your area"
+
 async def fetch_news(location: str, page_size: int = 5):
     if not NEWSAPI_KEY:
         raise RuntimeError("NEWSAPI_KEY not set")
@@ -155,25 +175,31 @@ async def weather(lat: float = Query(...), lon: float = Query(...)):
         raise HTTPException(status_code=502, detail=str(e))
 
 @app.get("/api/news")
-async def news(location: str = Query("Dhaka")):
+async def news(lat: float = Query(...), lon: float = Query(...)):
     try:
-        return await fetch_news(location)
+        location_name = await reverse_geocode(lat, lon)
+        return await fetch_news(location_name)
     except Exception as e:
         raise HTTPException(status_code=502, detail=str(e))
 
 @app.post("/api/plan")
 async def plan(req: PlanRequest):
     try:
-        # 1️⃣ Fetch data
+        # 1️⃣ Fetch weather
         weather = await fetch_weather(req.lat, req.lon)
-        news = await fetch_news(req.location_name)
 
-        # 2️⃣ Build structured prompt
+        # 2️⃣ Get location name from lat/lon
+        location_name = await reverse_geocode(req.lat, req.lon)
+
+        # 3️⃣ Fetch news using location name
+        news = await fetch_news(location_name)
+
+        # 4️⃣ Build structured prompt
         prompt = build_prompt(weather, news, req.preferences)
 
-        # 3️⃣ Call Hugging Face LLM
+        # 5️⃣ Call LLM
         llm_resp = await call_llm(prompt)
-        return {"plan": llm_resp}
+        return {"plan": llm_resp, "location_name": location_name}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -24,21 +24,28 @@ function App() {
     );
   }, []);
 
-  useEffect(() => {
-    if (!coords) return;
-    const fetchData = async () => {
-      try {
-        const w = await axios.get(`${API_BASE}/api/weather`, { params: { lat: coords.lat, lon: coords.lon } });
-        setWeather(w.data);
-        const n = await axios.get(`${API_BASE}/api/news`, { params: { location: "Dhaka" } });
-        setNews(n.data);
-      } catch (e) {
-        console.error(e);
-        alert("Error fetching weather/news.");
-      }
-    };
-    fetchData();
-  }, [coords]);
+useEffect(() => {
+  if (!coords) return;
+  const fetchData = async () => {
+    try {
+      // Fetch weather
+      const w = await axios.get(`${API_BASE}/api/weather`, { 
+        params: { lat: coords.lat, lon: coords.lon } 
+      });
+      setWeather(w.data);
+
+      // Fetch news based on current location
+      const n = await axios.get(`${API_BASE}/api/news`, { 
+        params: { lat: coords.lat, lon: coords.lon } 
+      });
+      setNews(n.data);
+    } catch (e) {
+      console.error(e);
+      alert("Error fetching weather/news.");
+    }
+  };
+  fetchData();
+}, [coords]);
 
   const onGeneratePlan = async () => {
     if (!coords) return alert("No coords");
@@ -47,7 +54,8 @@ function App() {
       const r = await axios.post(`${API_BASE}/api/plan`, {
         lat: coords.lat,
         lon: coords.lon,
-        location_name: "Dhaka",
+        // location_name can be left empty; backend will reverse geocode
+        location_name: "",
         preferences: { outdoors: true },
       });
       setPlan(r.data);
