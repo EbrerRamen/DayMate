@@ -82,13 +82,20 @@ function App() {
 
       {/* Weather & News */}
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-        {weather && (
-          <div className="p-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
-            <h2 className="text-2xl font-semibold text-cyan-300 mb-2">🌤 Weather</h2>
-            <p className="capitalize text-lg font-medium">{weather.weather[0].description}</p>
-            <p className="text-3xl font-bold mt-1">{weather.main.temp}°C</p>
-          </div>
-        )}
+{weather && (
+  <div className="p-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
+    <h2 className="text-2xl font-semibold text-cyan-300 mb-2">🌤 Weather</h2>
+    <p className="text-xl font-medium capitalize">{weather.weather[0].description}</p>
+    <p className="text-4xl font-bold mt-1">
+      {Math.round(weather.main.temp)}°C
+    </p>
+    <div className="mt-2 text-indigo-100 space-y-1">
+      <p>Feels like: {Math.round(weather.main.feels_like)}°C</p>
+      <p>Humidity: {weather.main.humidity}%</p>
+      <p>Wind: {weather.wind.speed} km/s</p>
+    </div>
+  </div>
+)}
 
         {news?.articles && (
           <div className="p-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
