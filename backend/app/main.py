@@ -6,6 +6,7 @@ import os
 import httpx
 import json
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()  # only used for local dev when running with .env
 
@@ -75,61 +76,87 @@ async def fetch_news(location: str, page_size: int = 5):
     return r.json()
 
 def build_prompt(weather_json, news_json, preferences):
-    # concise structured prompt
-    current = weather_json.get("current", {})
-    main = current.get("weather", [{}])[0].get("main", "Unknown")
-    temp = current.get("temp", "Unknown")
-    pop = None
-    try:
-        pop = weather_json.get("hourly", [{}])[0].get("pop", 0)
-    except Exception:
-        pop = 0
+    # Weather summary
+    main = weather_json.get("weather", [{}])[0].get("main", "Unknown")
+    temp = weather_json.get("main", {}).get("temp", "Unknown")
+    pop = weather_json.get("rain", {}).get("1h", 0)  # precipitation probability fallback
     weather_summary = f"{main}, {temp}°C, precipitation_prob={pop}"
+
+    # Top 5 news headlines
     headlines = []
-    for a in news_json.get("articles", [])[:5]:
-        t = a.get("title")
-        if t:
-            headlines.append(t)
+    for article in news_json.get("articles", [])[:5]:
+        title = article.get("title")
+        if title:
+            headlines.append(title)
     news_block = "\n".join([f"- {h}" for h in headlines]) or "No major headlines."
+
+    # Build prompt
     prompt = f"""
-You are DayMate, an assistant that creates a daily plan. Use the weather and local news.
+You are DayMate, an AI assistant that creates a daily plan for the user.
+Use the following weather and news information to produce a **valid JSON object only**. Do not add any extra text outside the JSON.
+
 Weather summary: {weather_summary}
 Top news:
 {news_block}
 User preferences: {preferences}
 
-Return a JSON object EXACTLY with keys:
-{
-  "priority_actions": [strings],
-  "suggestions": [strings],
-  "rationale": "short reason",
-  "quick_tips": [strings],
+Return JSON with exactly the following keys:
+{{
+  "priority_actions": ["example action 1", "example action 2"],
+  "suggestions": ["example suggestion 1", "example suggestion 2"],
+  "rationale": "short reason for the plan",
+  "quick_tips": ["example tip 1", "example tip 2"],
   "summary": "one-sentence summary"
-}
-Also include human-friendly text under 'summary'.
+}}
+
+Make sure the JSON is valid and parsable. Do not include any commentary outside the JSON.
 """
     return prompt
 
 async def call_llm(prompt: str):
-    if LLM_PROVIDER == "openai":
-        # OpenAI Chat Completions (REST)
+    if LLM_PROVIDER == "huggingface":
         if not LLM_API_KEY:
             raise RuntimeError("LLM_API_KEY not set")
-        url = "https://api.openai.com/v1/chat/completions"
-        headers = {"Authorization": f"Bearer {LLM_API_KEY}"}
-        payload = {
-            "model": "gpt-4o-mini",  # change to available model for your account
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 500,
-            "temperature": 0.4
-        }
-        async with httpx.AsyncClient(timeout=30) as client:
-            r = await client.post(url, json=payload, headers=headers)
-        r.raise_for_status()
-        data = r.json()
-        return data["choices"][0]["message"]["content"]
+        
+        client = OpenAI(
+            base_url="https://router.huggingface.co/v1",
+            api_key=LLM_API_KEY,
+        )
+
+        completion = client.chat.completions.create(
+        model="deepseek-ai/DeepSeek-V3.2-Exp:novita",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.4,
+        max_tokens=500
+    )
+
+        # url = "https://router.huggingface.co/v1"
+        # headers = {"Authorization": f"Bearer {LLM_API_KEY}"}
+        # payload = {
+        #     "model": "deepseek-ai/DeepSeek-V3.2-Exp:novita",
+        #     "messages": [{"role": "user", "content": prompt}],
+        #     "max_tokens": 500,
+        #     "temperature": 0.4
+        # }
+
+        data = completion.choices[0].message.content
+        print(data)
+
+        # async with httpx.AsyncClient(timeout=30) as client:
+        #     r = await client.post(url, json=payload, headers=headers)
+        
+        # r.raise_for_status()
+        # data = r.json()
+
+        # Hugging Face Chat Completions mimic OpenAI structure
+        # Adjust if keys are different
+        try:
+            return data["choices"][0]["message"]["content"]
+        except KeyError:
+            # fallback: return full response if structure is different
+            return str(data)
+
     else:
-        # placeholder - implement other providers if needed
         raise RuntimeError("Unsupported LLM_PROVIDER")
 
 @app.get("/health")
@@ -153,15 +180,34 @@ async def news(location: str = Query("Dhaka")):
 @app.post("/api/plan")
 async def plan(req: PlanRequest):
     try:
+        # 1️⃣ Fetch data
         weather = await fetch_weather(req.lat, req.lon)
         news = await fetch_news(req.location_name)
+
+        # 2️⃣ Build structured prompt
         prompt = build_prompt(weather, news, req.preferences)
+
+        # 3️⃣ Call Hugging Face LLM
+        print("llm_resp")
         llm_resp = await call_llm(prompt)
-        try:
-            parsed = json.loads(llm_resp)
-            return {"plan": parsed}
-        except Exception:
-            # return raw text if JSON parsing fails
+        print(llm_resp)
+
+        # 4️⃣ Parse JSON from LLM response
+        import re
+
+        # Sometimes models return extra text around JSON
+        # Extract JSON-looking substring
+        json_match = re.search(r"\{.*\}", llm_resp, re.DOTALL)
+        if json_match:
+            try:
+                parsed = json.loads(json_match.group())
+                return {"plan": parsed}
+            except json.JSONDecodeError:
+                # fallback if parsing fails
+                return {"raw": llm_resp}
+        else:
+            # return raw text if no JSON detected
             return {"raw": llm_resp}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
