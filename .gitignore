@@ -1,0 +1,9 @@
+# Python
+__pycache__/
+*.py[cod]
+env/
+venv/
+backend/.env
+frontend/node_modules/
+frontend/.env
+.DS_Store
