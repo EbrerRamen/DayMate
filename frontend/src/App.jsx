@@ -82,19 +82,51 @@ function App() {
 
       {/* Weather & News */}
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-{weather && (
-  <div className="p-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
-    <h2 className="text-2xl font-semibold text-cyan-300 mb-2">🌤 Weather</h2>
-    <p className="text-xl font-medium capitalize">{weather.weather[0].description}</p>
-    <p className="text-4xl font-bold mt-1">
-      {Math.round(weather.main.temp)}°C
-    </p>
-    <div className="mt-2 text-indigo-100 space-y-1">
-      <p>Feels like: {Math.round(weather.main.feels_like)}°C</p>
-      <p>Humidity: {weather.main.humidity}%</p>
-      <p>Wind: {weather.wind.speed} km/s</p>
-    </div>
+      {weather && (
+        <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-900/60 to-indigo-900/40 backdrop-blur-lg border border-white/20 shadow-2xl">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-semibold text-cyan-300 flex items-center gap-2">
+              🌤 Weather
+            </h2>
+            <span className="text-white/70 text-sm">{weather.name}, {weather.sys.country}</span>
+          </div>
+
+          {/* Main Temperature */}
+          <div className="flex items-center gap-6">
+            {/* Icon */}
+            <img
+              src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+              alt={weather.weather[0].description}
+              className="w-20 h-20"
+            />
+            {/* Temp & Description */}
+            <div>
+              <p className="text-5xl font-bold text-white">
+                {Math.round(weather.main.temp)}°C
+              </p>
+              <p className="capitalize text-lg text-white/80 mt-1">
+                {weather.weather[0].description}
+              </p>
+            </div>
+          </div>
+
+          {/* Info Badges */}
+<div className="mt-6 grid grid-cols-3 gap-3">
+  <div className="flex flex-col items-center gap-1 px-3 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium text-sm">
+    <span className="text-xs">🌡️ Feels</span>
+    <span className="text-lg font-semibold">{Math.round(weather.main.feels_like)}°C</span>
   </div>
+  <div className="flex flex-col items-center gap-1 px-3 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium text-sm">
+    <span className="text-xs">💧 Humidity</span>
+    <span className="text-lg font-semibold">{weather.main.humidity}%</span>
+  </div>
+  <div className="flex flex-col items-center gap-1 px-3 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium text-sm">
+    <span className="text-xs">🌬️ Wind</span>
+    <span className="text-lg font-semibold">{weather.wind.speed} km/h</span>
+  </div>
+</div>
+        </div>
 )}
 
         {news?.articles && (
