@@ -16,6 +16,8 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [currentView, setCurrentView] = useState("home"); // "home", "login", "register", "guest"
 
+
+
   // Geolocation
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -50,24 +52,30 @@ function App() {
   }, [coords]);
 
   // Generate AI plan
-  const onGeneratePlan = async () => {
-    if (!coords) return alert("No coords");
-    setLoading(true);
-    try {
-      const r = await axios.post(`${API_BASE}/api/plan`, {
+const onGeneratePlan = async () => {
+  if (!coords) return alert("No coords");
+  setLoading(true);
+  try {
+    const r = await axios.post(
+      `${API_BASE}/api/plan`,
+      {
         lat: coords.lat,
         lon: coords.lon,
         location_name: "",
         preferences: { outdoors: true },
-      });
-      setPlan(r.data);
-    } catch (e) {
-      console.error(e);
-      alert("Error generating plan");
-    } finally {
-      setLoading(false);
-    }
-  };
+      },
+      {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      }
+    );
+    setPlan(r.data);
+  } catch (e) {
+    console.error(e);
+    alert("Error generating plan");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Logout
   const handleLogout = () => {
@@ -78,10 +86,11 @@ function App() {
   };
 
   // Navigation handlers
-  const goToGuestMode = () => setCurrentView("guest");
+  const goToHome = () => setCurrentView("home");
+  const goToMain = () => setCurrentView("main"); 
+  const goToGuestMode = goToMain;     
   const goToLogin = () => setCurrentView("login");
   const goToRegister = () => setCurrentView("register");
-  const goToHome = () => setCurrentView("home");
 
   // Render based on currentView
   if (currentView === "home") {
@@ -92,10 +101,23 @@ function App() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6 flex items-center justify-center">
         <div className="w-full max-w-md">
-          <Login onLoginSuccess={(t) => setToken(t)} />
+
+          <button
+            onClick={goToHome}
+            className="mb-4 text-indigo-300 hover:text-indigo-100 underline"
+          >
+            ← Back to Home
+          </button>
+
+          <Login onLoginSuccess={(t) => {
+            setToken(t);
+            localStorage.setItem("token", t);  // optional if you want persistence
+            setCurrentView("main");             // <- navigate to main page
+          }} />
+
           <p className="mt-4 text-center">
             Don't have an account?{" "}
-            <button className="text-cyan-400 underline" onClick={goToRegister}>
+            <button className="text-cyan-400 underline hover:text-cyan-200 transition" onClick={goToRegister}>
               Register
             </button>
           </p>
@@ -108,22 +130,45 @@ function App() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6 flex items-center justify-center">
         <div className="w-full max-w-md">
-          <Register onRegisterSuccess={(t) => setToken(t)} />
+
+          {/* Back to Home button */}
+          <button
+            onClick={goToHome}
+            className="mb-4 text-indigo-300 hover:text-indigo-100 underline"
+          >
+            ← Back to Home
+          </button>
+
+          <Register onRegisterSuccess={(t) => {
+            setToken(t);
+            localStorage.setItem("token", t);
+            setCurrentView("main");  // <- navigate to main page
+          }} />
+
           <p className="mt-4 text-center">
             Already have an account?{" "}
-            <button className="text-cyan-400 underline" onClick={goToLogin}>
+            <button className="text-cyan-400 underline hover:text-cyan-200 transition" onClick={goToLogin}>
               Login
             </button>
           </p>
+          
         </div>
       </div>
     );
   }
 
   // Main logged-in / guest view
+if (currentView === "main") {
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6">
-      <Navbar token={token} onLogout={handleLogout} onGuestMode={goToGuestMode} onLoginMode={goToLogin} />
+      <Navbar
+        token={token}
+        onLogout={handleLogout}
+        onGuestMode={goToGuestMode}
+        onLoginMode={goToLogin}
+        onHome={goToHome} 
+      />
       {/* Hero Section */}
       <header className="max-w-4xl mx-auto text-center mb-12">
         <h1 className="text-5xl font-bold mb-2 drop-shadow-md">
@@ -256,6 +301,6 @@ function App() {
       )}
     </div>
   );
+  }
 }
-
 export default App;

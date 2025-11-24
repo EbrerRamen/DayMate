@@ -1,9 +1,15 @@
 import React from "react";
 
-export default function Navbar({ token, onLogout, onGuestMode, onLoginMode }) {
+export default function Navbar({ token, onLogout, onGuestMode, onLoginMode, onHome }) {
   return (
     <nav className="flex justify-between items-center p-4 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold text-cyan-400">DayMate</h1>
+      <h1 
+        onClick={onHome}
+        className="text-2xl font-bold text-cyan-400 cursor-pointer"
+      >
+        DayMate
+      </h1>
+
       <div className="space-x-4">
         {!token ? (
           <>
@@ -11,8 +17,9 @@ export default function Navbar({ token, onLogout, onGuestMode, onLoginMode }) {
               onClick={onGuestMode}
               className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 transition"
             >
-              Guest Mode
+              Continue as Guest
             </button>
+
             <button
               onClick={onLoginMode}
               className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 transition"
