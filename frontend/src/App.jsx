@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Login from "./components/Login";
+import Register from "./components/Register";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
@@ -9,6 +11,8 @@ function App() {
   const [news, setNews] = useState(null);
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -66,6 +70,40 @@ useEffect(() => {
       setLoading(false);
     }
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setToken(null);
+    setPlan(null);
+  };
+
+  // Toggle login/register forms
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6 flex items-center justify-center">
+        <div className="w-full max-w-md">
+          {showRegister ? (
+            <>
+              <Register onRegisterSuccess={() => setShowRegister(false)} />
+              <p className="mt-4 text-center">
+                Already have an account?{" "}
+                <button className="text-cyan-400 underline" onClick={() => setShowRegister(false)}>Login</button>
+              </p>
+            </>
+          ) : (
+            <>
+              <Login onLoginSuccess={(t) => setToken(t)} />
+              <p className="mt-4 text-center">
+                Don't have an account?{" "}
+                <button className="text-cyan-400 underline" onClick={() => setShowRegister(true)}>Register</button>
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6">
