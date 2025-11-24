@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Home from "./components/Home";
 import Login from "./components/Login";
 import Register from "./components/Register";
 
@@ -13,6 +14,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [showRegister, setShowRegister] = useState(false);
+  const [showHome, setShowHome] = useState(true); // NEW
+  const [showLogin, setShowLogin] = useState(false); // NEW
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -76,34 +79,37 @@ useEffect(() => {
     setToken(null);
     setPlan(null);
   };
+  // Home Screen handlers
+  const handleGuestMode = () => {
+    setShowHome(false);
+  };
 
-  // Toggle login/register forms
-  if (!token) {
+  const handleLoginMode = () => {
+    setShowHome(false);
+    setShowLogin(true);
+  };
+
+  // If still showing Home, render it
+  if (showHome) {
+    return <Home onGuestMode={handleGuestMode} onLoginMode={handleLoginMode} />;
+  }
+
+  // If showing login/register screen and not yet logged in
+  if (showLogin && !token) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6 flex items-center justify-center">
         <div className="w-full max-w-md">
-          {showRegister ? (
-            <>
-              <Register onRegisterSuccess={() => setShowRegister(false)} />
-              <p className="mt-4 text-center">
-                Already have an account?{" "}
-                <button className="text-cyan-400 underline" onClick={() => setShowRegister(false)}>Login</button>
-              </p>
-            </>
-          ) : (
-            <>
-              <Login onLoginSuccess={(t) => setToken(t)} />
-              <p className="mt-4 text-center">
-                Don't have an account?{" "}
-                <button className="text-cyan-400 underline" onClick={() => setShowRegister(true)}>Register</button>
-              </p>
-            </>
-          )}
+          <Login onLoginSuccess={(t) => setToken(t)} />
+          <p className="mt-4 text-center">
+            Don't have an account?{" "}
+            <button className="text-cyan-400 underline" onClick={() => setShowLogin(false)}>
+              Register
+            </button>
+          </p>
         </div>
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6">
