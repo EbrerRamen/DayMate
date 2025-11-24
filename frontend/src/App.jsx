@@ -156,7 +156,7 @@ const onGeneratePlan = async () => {
   }
 
   // Main logged-in / guest view
-if (currentView === "main") {
+  if (currentView === "main") {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6">
@@ -217,20 +217,20 @@ if (currentView === "main") {
           </div>
 
           {/* Info Badges */}
-<div className="mt-6 grid grid-cols-3 gap-3">
-  <div className="flex flex-col items-center gap-1 px-3 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium text-sm">
-    <span className="text-xs">🌡️ Feels</span>
-    <span className="text-lg font-semibold">{Math.round(weather.main.feels_like)}°C</span>
-  </div>
-  <div className="flex flex-col items-center gap-1 px-3 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium text-sm">
-    <span className="text-xs">💧 Humidity</span>
-    <span className="text-lg font-semibold">{weather.main.humidity}%</span>
-  </div>
-  <div className="flex flex-col items-center gap-1 px-3 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium text-sm">
-    <span className="text-xs">🌬️ Wind</span>
-    <span className="text-lg font-semibold">{weather.wind.speed} m/s</span>
-  </div>
-</div>
+          <div className="mt-6 grid grid-cols-3 gap-3">
+            <div className="flex flex-col items-center gap-1 px-3 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium text-sm">
+              <span className="text-xs">🌡️ Feels</span>
+              <span className="text-lg font-semibold">{Math.round(weather.main.feels_like)}°C</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 px-3 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium text-sm">
+              <span className="text-xs">💧 Humidity</span>
+              <span className="text-lg font-semibold">{weather.main.humidity}%</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 px-3 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium text-sm">
+              <span className="text-xs">🌬️ Wind</span>
+              <span className="text-lg font-semibold">{weather.wind.speed} m/s</span>
+            </div>
+          </div>
           </div>
         )}
 
