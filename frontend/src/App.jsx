@@ -104,7 +104,7 @@ const onGeneratePlan = async () => {
 
           <button
             onClick={goToHome}
-            className="mb-4 text-indigo-300 hover:text-indigo-100 underline"
+            className="mb-4 text-indigo-300 hover:text-indigo-100 underline cursor-pointer"
           >
             ← Back to Home
           </button>
@@ -117,7 +117,7 @@ const onGeneratePlan = async () => {
 
           <p className="mt-4 text-center">
             Don't have an account?{" "}
-            <button className="text-cyan-400 underline hover:text-cyan-200 transition" onClick={goToRegister}>
+            <button className="text-cyan-400 underline hover:text-cyan-200 transition cursor-pointer" onClick={goToRegister}>
               Register
             </button>
           </p>
@@ -134,7 +134,7 @@ const onGeneratePlan = async () => {
           {/* Back to Home button */}
           <button
             onClick={goToHome}
-            className="mb-4 text-indigo-300 hover:text-indigo-100 underline"
+            className="mb-4 text-indigo-300 hover:text-indigo-100 underline cursor-pointer"
           >
             ← Back to Home
           </button>
@@ -147,7 +147,7 @@ const onGeneratePlan = async () => {
 
           <p className="mt-4 text-center">
             Already have an account?{" "}
-            <button className="text-cyan-400 underline hover:text-cyan-200 transition" onClick={goToLogin}>
+            <button className="text-cyan-400 underline hover:text-cyan-200 transition cursor-pointer" onClick={goToLogin}>
               Login
             </button>
           </p>
