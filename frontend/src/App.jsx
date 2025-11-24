@@ -3,6 +3,7 @@ import axios from "axios";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import Navbar from "./components/Navbar";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
@@ -13,10 +14,9 @@ function App() {
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
-  const [showRegister, setShowRegister] = useState(false);
-  const [showHome, setShowHome] = useState(true); // NEW
-  const [showLogin, setShowLogin] = useState(false); // NEW
+  const [currentView, setCurrentView] = useState("home"); // "home", "login", "register", "guest"
 
+  // Geolocation
   useEffect(() => {
     if (!navigator.geolocation) {
       alert("Geolocation not supported. Please enter location manually.");
@@ -31,29 +31,25 @@ function App() {
     );
   }, []);
 
-useEffect(() => {
-  if (!coords) return;
-  const fetchData = async () => {
-    try {
-      // Fetch weather
-      const w = await axios.get(`${API_BASE}/api/weather`, { 
-        params: { lat: coords.lat, lon: coords.lon } 
-      });
-      setWeather(w.data);
+  // Fetch weather and news
+  useEffect(() => {
+    if (!coords) return;
+    const fetchData = async () => {
+      try {
+        const w = await axios.get(`${API_BASE}/api/weather`, { params: { lat: coords.lat, lon: coords.lon } });
+        setWeather(w.data);
 
-      // Fetch news based on current location
-      const n = await axios.get(`${API_BASE}/api/news`, { 
-        params: { lat: coords.lat, lon: coords.lon } 
-      });
-      setNews(n.data);
-    } catch (e) {
-      console.error(e);
-      alert("Error fetching weather/news.");
-    }
-  };
-  fetchData();
-}, [coords]);
+        const n = await axios.get(`${API_BASE}/api/news`, { params: { lat: coords.lat, lon: coords.lon } });
+        setNews(n.data);
+      } catch (e) {
+        console.error(e);
+        alert("Error fetching weather/news.");
+      }
+    };
+    fetchData();
+  }, [coords]);
 
+  // Generate AI plan
   const onGeneratePlan = async () => {
     if (!coords) return alert("No coords");
     setLoading(true);
@@ -61,7 +57,6 @@ useEffect(() => {
       const r = await axios.post(`${API_BASE}/api/plan`, {
         lat: coords.lat,
         lon: coords.lon,
-        // location_name can be left empty; backend will reverse geocode
         location_name: "",
         preferences: { outdoors: true },
       });
@@ -74,35 +69,33 @@ useEffect(() => {
     }
   };
 
+  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     setToken(null);
     setPlan(null);
-  };
-  // Home Screen handlers
-  const handleGuestMode = () => {
-    setShowHome(false);
+    setCurrentView("home");
   };
 
-  const handleLoginMode = () => {
-    setShowHome(false);
-    setShowLogin(true);
-  };
+  // Navigation handlers
+  const goToGuestMode = () => setCurrentView("guest");
+  const goToLogin = () => setCurrentView("login");
+  const goToRegister = () => setCurrentView("register");
+  const goToHome = () => setCurrentView("home");
 
-  // If still showing Home, render it
-  if (showHome) {
-    return <Home onGuestMode={handleGuestMode} onLoginMode={handleLoginMode} />;
+  // Render based on currentView
+  if (currentView === "home") {
+    return <Home onGuestMode={goToGuestMode} onLoginMode={goToLogin} />;
   }
 
-  // If showing login/register screen and not yet logged in
-  if (showLogin && !token) {
+  if (currentView === "login" && !token) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6 flex items-center justify-center">
         <div className="w-full max-w-md">
           <Login onLoginSuccess={(t) => setToken(t)} />
           <p className="mt-4 text-center">
             Don't have an account?{" "}
-            <button className="text-cyan-400 underline" onClick={() => setShowLogin(false)}>
+            <button className="text-cyan-400 underline" onClick={goToRegister}>
               Register
             </button>
           </p>
@@ -111,10 +104,27 @@ useEffect(() => {
     );
   }
 
+  if (currentView === "register" && !token) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6 flex items-center justify-center">
+        <div className="w-full max-w-md">
+          <Register onRegisterSuccess={(t) => setToken(t)} />
+          <p className="mt-4 text-center">
+            Already have an account?{" "}
+            <button className="text-cyan-400 underline" onClick={goToLogin}>
+              Login
+            </button>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Main logged-in / guest view
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6">
-      
-      {/* Hero */}
+      <Navbar token={token} onLogout={handleLogout} onGuestMode={goToGuestMode} onLoginMode={goToLogin} />
+      {/* Hero Section */}
       <header className="max-w-4xl mx-auto text-center mb-12">
         <h1 className="text-5xl font-bold mb-2 drop-shadow-md">
           DayMate — <span className="text-cyan-400">Your AI Daily Planner</span>
@@ -123,10 +133,9 @@ useEffect(() => {
         <button
           onClick={onGeneratePlan}
           disabled={loading || !coords}
-          className={`mt-6 px-8 py-3 rounded-2xl font-semibold shadow-lg transition-all duration-200
-            ${loading || !coords 
-              ? "bg-indigo-600/50 cursor-not-allowed" 
-              : "bg-cyan-500 hover:bg-cyan-400 hover:scale-105"} text-white`}
+          className={`mt-6 px-8 py-3 rounded-2xl font-semibold shadow-lg transition-all duration-200 ${
+            loading || !coords ? "bg-indigo-600/50 cursor-not-allowed" : "bg-cyan-500 hover:bg-cyan-400 hover:scale-105"
+          } text-white`}
         >
           {loading ? "Generating…" : "Generate Plan"}
         </button>
@@ -134,9 +143,10 @@ useEffect(() => {
 
       {/* Weather & News */}
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-      {weather && (
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-900/60 to-indigo-900/40 backdrop-blur-lg border border-white/20 shadow-2xl">
-          {/* Header */}
+        {weather && (
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-900/60 to-indigo-900/40 backdrop-blur-lg border border-white/20 shadow-2xl">
+            {/* Weather content here... same as before */}
+                      {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-semibold text-cyan-300 flex items-center gap-2">
               🌤 Weather
@@ -175,15 +185,16 @@ useEffect(() => {
   </div>
   <div className="flex flex-col items-center gap-1 px-3 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium text-sm">
     <span className="text-xs">🌬️ Wind</span>
-    <span className="text-lg font-semibold">{weather.wind.speed} km/h</span>
+    <span className="text-lg font-semibold">{weather.wind.speed} m/s</span>
   </div>
 </div>
-        </div>
-)}
+          </div>
+        )}
 
         {news?.articles && (
           <div className="p-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg">
-            <h2 className="text-2xl font-semibold text-cyan-300 mb-2">📰 Top News</h2>
+            {/* News content here... same as before */}
+                        <h2 className="text-2xl font-semibold text-cyan-300 mb-2">📰 Top News</h2>
             <ul className="space-y-2 text-indigo-100">
               {news.articles.slice(0, 5).map((a, idx) => (
                 <li key={idx}>
@@ -200,7 +211,8 @@ useEffect(() => {
       {/* AI Plan */}
       {plan?.plan && (
         <div className="max-w-4xl mx-auto space-y-6">
-          {plan.plan.summary && (
+          {/* Plan content same as before */}
+                    {plan.plan.summary && (
             <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-md">
               <h3 className="text-xl font-semibold text-cyan-300 mb-2">📋 Summary</h3>
               <p>{plan.plan.summary}</p>
