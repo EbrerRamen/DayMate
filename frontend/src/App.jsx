@@ -139,10 +139,8 @@ const onGeneratePlan = async () => {
             ← Back to Home
           </button>
 
-          <Register onRegisterSuccess={(t) => {
-            setToken(t);
-            localStorage.setItem("token", t);
-            setCurrentView("main");  // <- navigate to main page
+          <Register onRegisterSuccess={() => {
+            setCurrentView("login");
           }} />
 
           <p className="mt-4 text-center">
