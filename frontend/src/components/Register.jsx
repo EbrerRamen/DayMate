@@ -61,7 +61,7 @@ export default function Register({ onRegisterSuccess, goToLogin }) {
       <button
         type="submit"
         disabled={loading}
-        className={`w-full py-3 rounded-xl font-semibold text-white shadow-md transform transition-all duration-200 ${
+        className={`w-full py-3 rounded-xl font-semibold text-white shadow-md transform transition-all duration-200 cursor-pointer ${
           loading ? "bg-cyan-600/50 cursor-not-allowed" : "bg-cyan-500 hover:bg-cyan-400 hover:scale-105"
         }`}
       >
