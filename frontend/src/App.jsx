@@ -86,10 +86,16 @@ const onGeneratePlan = async () => {
   };
 
   // Navigation handlers
-  const goToHome = () => setCurrentView("home");
+  const goToHome = () => {
+  setPlan(null);
+  setCurrentView("home");
+};
   const goToMain = () => setCurrentView("main"); 
   const goToGuestMode = goToMain;     
-  const goToLogin = () => setCurrentView("login");
+  const goToLogin = () => {
+  setPlan(null);   
+  setCurrentView("login");
+};
   const goToRegister = () => setCurrentView("register");
 
   // Render based on currentView
@@ -109,11 +115,12 @@ const onGeneratePlan = async () => {
             ← Back to Home
           </button>
 
-          <Login onLoginSuccess={(t) => {
-            setToken(t);
-            localStorage.setItem("token", t);  // optional if you want persistence
-            setCurrentView("main");             // <- navigate to main page
-          }} />
+        <Login onLoginSuccess={(t) => {
+          setToken(t);
+          localStorage.setItem("token", t);
+          setPlan(null);            
+          setCurrentView("main");
+        }} />
 
           <p className="mt-4 text-center">
             Don't have an account?{" "}
