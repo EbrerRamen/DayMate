@@ -1,2 +1,20 @@
 @import "tailwindcss";
 
+/* Hide scrollbar by default */
+::-webkit-scrollbar {
+  width: 0;
+}
+
+/* On hover (parent has overflow-y-auto), show smooth thin bar */
+ul:hover::-webkit-scrollbar {
+  width: 6px;
+}
+
+ul::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.4); /* cyan-400/40 */
+  border-radius: 9999px;
+}
+
+ul:hover::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.6); /* brighter on hover */
+}
