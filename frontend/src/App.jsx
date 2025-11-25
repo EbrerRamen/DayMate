@@ -187,7 +187,7 @@ const onGeneratePlan = async () => {
       {/* Weather & News */}
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         {weather && (
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-blue-900/60 to-indigo-900/40 backdrop-blur-lg border border-white/20 shadow-2xl">
+          <div className="p-6 h-[380px] rounded-3xl bg-gradient-to-br from-blue-900/60 to-indigo-900/40 backdrop-blur-lg border border-white/20 shadow-2xl">
             {/* Weather content here... same as before */}
                       {/* Header */}
           <div className="flex items-center justify-between mb-4">
@@ -235,10 +235,10 @@ const onGeneratePlan = async () => {
         )}
 
 {news?.articles && (
-  <div className="p-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg flex flex-col">
+  <div className="p-6 h-[380px] rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg flex flex-col">
     <h2 className="text-2xl font-semibold text-cyan-300 mb-4">📰 Top News</h2>
 
-    <ul className="space-y-4 text-indigo-100">
+    <ul className="space-y-4 text-indigo-100 overflow-y-auto pr-2">
       {news.articles.slice(0, 5).map((a, idx) => (
         <li key={idx} className="bg-white/5 p-3 rounded-xl flex gap-3">
           
