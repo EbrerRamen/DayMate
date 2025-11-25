@@ -23,7 +23,7 @@ export default function Navbar({ token, onLogout, onGuestMode, onLoginMode, onHo
         ) : (
           <button
             onClick={onLogout}
-            className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-400 transition"
+            className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-400 transition cursor-pointer"
           >
             Logout
           </button>
