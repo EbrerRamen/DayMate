@@ -3,22 +3,20 @@ import axios from "axios";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
-export default function PlanHistory({ token }) {
-  const [history, setHistory] = useState([]);
+export default function PlanHistory({ token, onBack }) {
+  const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expandedPlanId, setExpandedPlanId] = useState(null);
 
   useEffect(() => {
     const fetchHistory = async () => {
-      if (!token) return;
       try {
         const res = await axios.get(`${API_BASE}/api/plan/history`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setHistory(res.data.plans);
+        setPlans(res.data.plans);
       } catch (e) {
-        console.error("Error fetching history:", e);
-        alert("Failed to fetch plan history.");
+        console.error(e);
+        alert("Error fetching plan history");
       } finally {
         setLoading(false);
       }
@@ -27,79 +25,82 @@ export default function PlanHistory({ token }) {
     fetchHistory();
   }, [token]);
 
-  if (loading) return <p className="text-center text-white mt-8">Loading history…</p>;
-  if (!history.length) return <p className="text-center text-white mt-8">No saved plans yet.</p>;
+  if (loading) return <p className="text-center text-white mt-12">Loading history...</p>;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <h2 className="text-3xl font-bold text-cyan-300 mb-4 text-center">🗂️ Your Daily Plan History</h2>
+    <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white p-6">
+      <button
+        onClick={onBack}
+        className="mb-6 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 rounded-lg transition"
+      >
+        ← Back
+      </button>
 
-      {history.map((h) => (
-        <div
-          key={h.id}
-          className="p-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-lg transition-all"
-        >
-          <div className="flex justify-between items-center mb-2">
-            <div>
-              <p className="font-semibold text-lg text-cyan-200">{new Date(h.created_at).toLocaleString()}</p>
-              <p className="text-sm text-white/70">{h.location_name}</p>
-            </div>
-            <button
-              onClick={() =>
-                setExpandedPlanId(expandedPlanId === h.id ? null : h.id)
-              }
-              className="text-cyan-400 hover:text-cyan-300 font-medium"
+      <h1 className="text-3xl font-bold mb-6 text-cyan-400">Your Plan History</h1>
+
+      {plans.length === 0 ? (
+        <p>No plans found.</p>
+      ) : (
+        <div className="space-y-6">
+          {plans.map((p) => (
+            <div
+              key={p.id}
+              className="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-md"
             >
-              {expandedPlanId === h.id ? "Hide Details" : "View Details"}
-            </button>
-          </div>
+              <p className="text-sm text-white/70 mb-2">
+                {new Date(p.created_at).toLocaleString()} — {p.location_name}
+              </p>
 
-          {expandedPlanId === h.id && (
-            <div className="mt-4 space-y-4 text-white/90">
-              {h.plan.summary && (
+              {p.plan.summary && (
                 <div>
                   <h3 className="text-xl font-semibold text-cyan-300 mb-1">📋 Summary</h3>
-                  <p>{h.plan.summary}</p>
+                  <p>{p.plan.summary}</p>
                 </div>
               )}
 
-              {h.plan.priority_actions?.length > 0 && (
+              {p.plan.priority_actions?.length > 0 && (
                 <div>
                   <h3 className="text-xl font-semibold text-cyan-300 mb-1">🔥 Priority Actions</h3>
                   <ul className="list-disc list-inside space-y-1">
-                    {h.plan.priority_actions.map((a, i) => <li key={i}>{a}</li>)}
+                    {p.plan.priority_actions.map((a, i) => (
+                      <li key={i}>{a}</li>
+                    ))}
                   </ul>
                 </div>
               )}
 
-              {h.plan.suggestions?.length > 0 && (
+              {p.plan.suggestions?.length > 0 && (
                 <div>
                   <h3 className="text-xl font-semibold text-cyan-300 mb-1">💡 Suggestions</h3>
                   <ul className="list-disc list-inside space-y-1">
-                    {h.plan.suggestions.map((s, i) => <li key={i}>{s}</li>)}
+                    {p.plan.suggestions.map((s, i) => (
+                      <li key={i}>{s}</li>
+                    ))}
                   </ul>
                 </div>
               )}
 
-              {h.plan.quick_tips?.length > 0 && (
+              {p.plan.quick_tips?.length > 0 && (
                 <div>
                   <h3 className="text-xl font-semibold text-cyan-300 mb-1">⚡ Quick Tips</h3>
                   <ul className="list-disc list-inside space-y-1">
-                    {h.plan.quick_tips.map((t, i) => <li key={i}>{t}</li>)}
+                    {p.plan.quick_tips.map((t, i) => (
+                      <li key={i}>{t}</li>
+                    ))}
                   </ul>
                 </div>
               )}
 
-              {h.plan.rationale && (
+              {p.plan.rationale && (
                 <div>
                   <h3 className="text-xl font-semibold text-cyan-300 mb-1">🧭 Rationale</h3>
-                  <p>{h.plan.rationale}</p>
+                  <p>{p.plan.rationale}</p>
                 </div>
               )}
             </div>
-          )}
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }

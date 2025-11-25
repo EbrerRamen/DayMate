@@ -4,6 +4,7 @@ import Home from "./components/Home";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Navbar from "./components/Navbar";
+import PlanHistory from "./components/PlanHistory";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
@@ -104,10 +105,9 @@ const onGeneratePlan = async () => {
     return <Home onGuestMode={goToGuestMode} onLoginMode={goToLogin} />;
   }
 
-  if (currentView === "history" && token) {
-  return <PlanHistory token={token} />;
+if (currentView === "history" && token) {
+  return <PlanHistory token={token} onBack={goToMain} />;
 }
-
   if (currentView === "login" && !token) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-950 to-blue-900 text-white font-sans p-6 flex items-center justify-center">
