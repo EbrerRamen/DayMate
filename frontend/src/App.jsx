@@ -97,11 +97,16 @@ const onGeneratePlan = async () => {
   setCurrentView("login");
 };
   const goToRegister = () => setCurrentView("register");
+  const goToHistory = () => setCurrentView("history");
 
   // Render based on currentView
   if (currentView === "home") {
     return <Home onGuestMode={goToGuestMode} onLoginMode={goToLogin} />;
   }
+
+  if (currentView === "history" && token) {
+  return <PlanHistory token={token} />;
+}
 
   if (currentView === "login" && !token) {
     return (
@@ -173,6 +178,7 @@ const onGeneratePlan = async () => {
         onGuestMode={goToGuestMode}
         onLoginMode={goToLogin}
         onHome={goToHome} 
+        onHistory={goToHistory}
       />
       {/* Hero Section */}
       <header className="max-w-4xl mx-auto text-center mb-12">
