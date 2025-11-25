@@ -187,7 +187,8 @@ const onGeneratePlan = async () => {
       {/* Weather & News */}
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         {weather && (
-          <div className="p-6 h-[380px] rounded-3xl bg-gradient-to-br from-blue-900/60 to-indigo-900/40 backdrop-blur-lg border border-white/20 shadow-2xl">
+          <div className="p-6 h-[380px] rounded-3xl bg-gradient-to-br from-blue-900/60 to-indigo-900/40 
+    backdrop-blur-lg border border-white/20 shadow-2xl flex flex-col">
             {/* Weather content here... same as before */}
                       {/* Header */}
           <div className="flex items-center justify-between mb-4">
@@ -217,7 +218,7 @@ const onGeneratePlan = async () => {
           </div>
 
           {/* Info Badges */}
-          <div className="mt-6 grid grid-cols-3 gap-3">
+          <div className="mt-auto grid grid-cols-3 gap-3">
             <div className="flex flex-col items-center gap-1 px-3 py-3 bg-white/20 backdrop-blur-sm rounded-xl text-white font-medium text-sm">
               <span className="text-xs">🌡️ Feels</span>
               <span className="text-lg font-semibold">{Math.round(weather.main.feels_like)}°C</span>
