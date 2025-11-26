@@ -6,8 +6,8 @@ DayMate is a full‑stack AI‑powered daily planner that combines live weather,
 
 ## Live URLs
 
-- **Frontend (Vercel)**: `https://daymate-ten.vercel.app/`
-- **Backend API (Render)**: `https://daymate-8ljf.onrender.com`
+- **Frontend (Vercel)**: [https://daymate-ten.vercel.app/](https://daymate-ten.vercel.app/)
+- **Backend API (Render)**: [https://daymate-8ljf.onrender.com](https://daymate-8ljf.onrender.com)
 
 ---
 
