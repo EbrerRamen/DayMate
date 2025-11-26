@@ -1,4 +1,4 @@
-import Navbar from "../Navbar";
+import Navbar from "../NavBar";
 import HeroSection from "./HeroSection";
 import WeatherCard from "./WeatherCard";
 import NewsPanel from "./NewsPanel";
