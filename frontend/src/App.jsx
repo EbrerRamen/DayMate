@@ -43,8 +43,9 @@ function App() {
         source: "current",
       });
     }
-    return [...list, ...savedLocations, ...guestLocations];
-  }, [coords, savedLocations, guestLocations]);
+    const userLocations = token ? savedLocations : guestLocations;
+    return [...list, ...userLocations];
+  }, [coords, savedLocations, guestLocations, token]);
 
   const activeLocation = locations.find((loc) => loc.id === activeLocationId) || null;
   const { weather, news } = useLocationData(API_BASE, activeLocation);
