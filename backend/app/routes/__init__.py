@@ -1,2 +1,2 @@
-from . import auth, plan, public  # noqa: F401
+from . import auth, plan, public, locations  # noqa: F401
 

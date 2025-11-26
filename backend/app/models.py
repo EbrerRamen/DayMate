@@ -33,8 +33,17 @@ class UserResponse(BaseModel):
     class Config:
         orm_mode = True
 
+
 class DailyPlan(Model):
     user_id: ObjectId
     location_name: str
-    plan: dict       # the JSON returned by LLM
+    plan: dict  # the JSON returned by LLM
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class SavedLocation(Model):
+    user_id: ObjectId
+    label: str
+    lat: float
+    lon: float
     created_at: datetime = Field(default_factory=datetime.utcnow)
