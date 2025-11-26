@@ -13,7 +13,7 @@ const formatLocalDateTime = (timestamp, timezoneOffset) => {
 };
 
 const WeatherCard = ({ weather }) => (
-  <div className="p-6 h-[400px] rounded-3xl bg-gradient-to-br from-blue-900/60 to-indigo-900/40 backdrop-blur-lg border border-white/20 shadow-2xl flex flex-col">
+  <div className="p-6 h-[380px] rounded-3xl bg-gradient-to-br from-blue-900/60 to-indigo-900/40 backdrop-blur-lg border border-white/20 shadow-2xl flex flex-col">
     <div>
       <div className="flex items-center justify-between mb-1">
         <h2 className="text-2xl font-semibold text-cyan-300 flex items-center gap-2">🌤 Weather</h2>

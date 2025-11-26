@@ -199,7 +199,15 @@ function App() {
     setCurrentView("home");
   };
   const goToMain = () => setCurrentView("main");
-  const goToGuestMode = goToMain;
+  const goToGuestMode = () => {
+    if (token) {
+      localStorage.removeItem("token");
+      setToken(null);
+      setSavedLocations([]);
+    }
+    setPlansByLocation({});
+    setCurrentView("main");
+  };
   const goToLogin = () => {
     setPlansByLocation({});
     setCurrentView("login");
